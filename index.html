@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Silent Metro: accessible transit information (DEMO)</title>
+  <meta name="description" content="Local demo of an accessible metro passenger information platform. Simulated data only.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <div class="demo-banner" role="note"><strong>DEMO / SIMULATED DATA.</strong> This prototype is not connected to any metro operator or train-control system. Do not use it for real travel decisions.</div>
+
+  <header class="site-header">
+    <div class="brand"><img src="/favicon.svg" alt="" width="36" height="36"><span>Silent Metro</span></div>
+    <nav aria-label="Main">
+      <ul id="nav">
+        <li><a href="#journey" data-view="journey">Journey</a></li>
+        <li><a href="#plan" data-view="plan">Plan</a></li>
+        <li><a href="#stations" data-view="stations">Stations</a></li>
+        <li><a href="#qr" data-view="qr">QR</a></li>
+        <li><a href="#notifications" data-view="notifications">Notifications</a></li>
+        <li><a href="#settings" data-view="settings">Accessibility</a></li>
+        <li><a href="#operator" data-view="operator">Operator</a></li>
+      </ul>
+    </nav>
+    <p id="conn" class="conn" role="status">Connecting…</p>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <div id="banners" aria-label="Service announcements"></div>
+
+    <section id="view-journey" class="view" aria-labelledby="h-journey">
+      <h1 id="h-journey">Your journey</h1>
+      <p class="muted">Live station state. Each line shows its data source and how fresh the last update is.</p>
+      <div class="toolbar">
+        <button id="btn-repeat" class="btn" type="button">Repeat last announcement</button>
+        <button id="btn-speak-status" class="btn secondary" type="button">Read current status aloud</button>
+      </div>
+      <p id="last-announcement" class="announcement" aria-live="off">No announcement yet.</p>
+      <div id="lines" class="grid"></div>
+    </section>
+
+    <section id="view-plan" class="view" hidden aria-labelledby="h-plan">
+      <h1 id="h-plan">Plan a journey</h1>
+      <p class="muted">Demo routing over a fictional network. It is not a timetable and gives no arrival estimates.</p>
+      <form id="plan-form" class="card form-grid">
+        <label for="plan-from">From</label><select id="plan-from"></select>
+        <label for="plan-to">To</label><select id="plan-to"></select>
+        <div class="toolbar"><button class="btn" type="submit">Show directions</button><button id="btn-save-dest" class="btn secondary" type="button" hidden>Save destination</button></div>
+      </form>
+      <div id="saved" class="chips" aria-label="Saved destinations"></div>
+      <div id="plan-result" class="card" hidden aria-live="polite"></div>
+    </section>
+
+    <section id="view-stations" class="view" hidden aria-labelledby="h-stations">
+      <h1 id="h-stations">Station directory</h1>
+      <p id="stations-note" class="muted">Accessibility values are demonstration data and are not verified.</p>
+      <label for="station-search">Search stations</label>
+      <input id="station-search" type="search" autocomplete="off">
+      <div id="station-list" class="grid"></div>
+    </section>
+
+    <section id="view-qr" class="view" hidden aria-labelledby="h-qr">
+      <h1 id="h-qr">QR station navigation</h1>
+      <p class="muted">Scan a station QR code, or type the code printed under it. A QR code identifies a place; it does not track your position.</p>
+      <form id="qr-form" class="card form-grid">
+        <label for="qr-input">QR point code</label>
+        <input id="qr-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. central-platform-1" maxlength="48">
+        <div class="toolbar"><button class="btn" type="submit">Look up</button><button id="btn-scan" class="btn secondary" type="button">Scan with camera</button></div>
+      </form>
+      <div id="scan-box" class="card" hidden><video id="scan-video" playsinline muted aria-label="Camera preview for QR scanning"></video><button id="btn-scan-stop" class="btn secondary" type="button">Stop camera</button></div>
+      <p id="scan-support" class="muted"></p>
+      <div id="qr-result" class="card" hidden aria-live="polite"></div>
+      <p class="muted">Try: <button type="button" class="linklike" data-qr="central-platform-1">central-platform-1</button>, <button type="button" class="linklike" data-qr="north-gate-entrance">north-gate-entrance</button></p>
+    </section>
+
+    <section id="view-notifications" class="view" hidden aria-labelledby="h-notif">
+      <h1 id="h-notif">Notifications</h1>
+      <p class="muted">Recent in-app announcements. Web push is not available in this local demo. Delivery to your device cannot be confirmed by the server.</p>
+      <ol id="notif-list" class="plain-list"></ol>
+    </section>
+
+    <section id="view-settings" class="view" hidden aria-labelledby="h-settings">
+      <h1 id="h-settings">Accessibility settings</h1>
+      <form id="settings-form" class="card form-grid">
+        <label for="set-text">Text size</label>
+        <div class="row"><button type="button" class="btn secondary" id="text-dec" aria-label="Decrease text size">A−</button><output id="text-val" for="text-dec text-inc"></output><button type="button" class="btn secondary" id="text-inc" aria-label="Increase text size">A+</button></div>
+        <label for="set-contrast">High contrast</label><input id="set-contrast" type="checkbox">
+        <label for="set-motion">Reduce motion</label><input id="set-motion" type="checkbox">
+        <label for="set-speech">Spoken announcements</label><input id="set-speech" type="checkbox">
+        <label for="set-lang">Speech language</label>
+        <select id="set-lang"><option value="en-IN">English (India)</option><option value="en-GB">English (UK)</option><option value="en-US">English (US)</option><option value="hi-IN">Hindi</option></select>
+        <label for="set-rate">Speech speed</label><input id="set-rate" type="range" min="0.6" max="1.4" step="0.1">
+        <label for="set-vibe">Vibration alerts</label><input id="set-vibe" type="checkbox">
+        <label for="set-quiet">Quiet mode (visual only)</label><input id="set-quiet" type="checkbox">
+        <label for="set-cool">Minimum seconds between announcements</label><input id="set-cool" type="number" min="0" max="120" step="1">
+        <div class="toolbar"><button id="btn-test-alert" class="btn" type="button">Test announcement</button></div>
+      </form>
+      <p id="support-note" class="muted"></p>
+    </section>
+
+    <section id="view-operator" class="view" hidden aria-labelledby="h-operator">
+      <h1 id="h-operator">Operator console</h1>
+      <div id="login-card" class="card">
+        <h2>Sign in</h2>
+        <p class="muted">Demo accounts: <code>operator</code> / <code>operator-demo</code>, <code>passenger</code> / <code>passenger-demo</code> (local use only).</p>
+        <form id="login-form" class="form-grid">
+          <label for="login-user">Username</label><input id="login-user" autocomplete="username" required>
+          <label for="login-pass">Password</label><input id="login-pass" type="password" autocomplete="current-password" required>
+          <div class="toolbar"><button class="btn" type="submit">Sign in</button></div>
+        </form>
+        <p id="login-msg" role="alert"></p>
+      </div>
+      <div id="session-card" class="card" hidden><p id="session-text"></p><button id="btn-logout" class="btn secondary" type="button">Sign out</button></div>
+      <div id="console" hidden></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><p>Silent Metro local demo. Simulated data is labelled DEMO. No official transit connectivity. <span id="footer-mode"></span></p></footer>
+  <div id="live-polite" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="live-assertive" class="sr-only" role="alert" aria-atomic="true"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
